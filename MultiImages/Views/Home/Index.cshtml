@@ -1,0 +1,46 @@
+﻿@model IEnumerable<MultiImages.MultipleMediaRecord>
+@{
+    Layout = null;
+}
+
+
+
+
+
+<h2>Media Records</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Place</th>
+            <th>Area</th>
+            <th>Images</th>
+            <th>Videos</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var record in Model)
+        {
+            <tr>
+                <td>@record.Place</td>
+                <td>@record.Area</td>
+                <td>
+                    @foreach (var imagePath in record.ImagePaths?.Split(',') ?? new string[0])
+                    {
+                        <img src="@Url.Content(imagePath)" style="width: 100px; height: auto;" />
+                    }
+                </td>
+                <td>
+                    @foreach (var videoPath in record.VideoPaths?.Split(',') ?? new string[0])
+                    {
+                        <video width="200" controls>
+                            <source src="@Url.Content(videoPath)" type="video/mp4" />
+                            Your browser does not support the video tag.
+                        </video>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+

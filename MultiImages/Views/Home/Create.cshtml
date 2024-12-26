@@ -1,0 +1,160 @@
+﻿@{
+    ViewBag.Title = "Upload Files";
+}
+<head>
+    <style>
+        .main-uploading {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .uploading-area {
+            margin-bottom: 20px;
+        }
+
+        .upload-preview img, .upload-preview video {
+            width: 100px;
+            margin: 5px;
+        }
+
+        .upload-section {
+            margin-top: 10px;
+        }
+
+        .upload-button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+            .upload-button:hover {
+                background-color: #45a049;
+            }
+
+    </style>
+</head>
+<div>
+    <input type="text" id="place" />
+    <input type="text" id="Area" />
+</div>
+<div class="main-uploading">
+    <div class="uploading-area">
+        <span>Upload Images (max 5)</span>
+        <div class="upload-section">
+            <input type="file" id="imageUpload" accept="image/*" multiple>
+            <div id="imagePreview" class="upload-preview"></div>
+        </div>
+    </div>
+
+    <div class="uploading-area">
+        <span>Upload Videos (max 3)</span>
+        <div class="upload-section">
+            <input type="file" id="videoUpload" accept="video/*" multiple>
+            <div id="videoPreview" class="upload-preview"></div>
+        </div>
+    </div>
+
+    <button type="button" id="uploadMedia" class="upload-button">Upload</button>
+    <div id="responseMessage"></div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Image preview
+        $('#imageUpload').on('change', function () {
+            const maxImages = 5; // Limit to 5 images
+            const imagePreview = $('#imagePreview');
+            imagePreview.html(''); // Clear previous previews
+            const files = this.files;
+
+            if (files.length > maxImages) {
+                alert(`You can only upload a maximum of ${maxImages} images.`);
+                return;
+            }
+
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    imagePreview.append(`<img src="${e.target.result}" alt="Image" style="width: 100px; margin: 5px;">`);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        // Video preview
+        $('#videoUpload').on('change', function () {
+            const maxVideos = 3; // Limit to 3 videos
+            const videoPreview = $('#videoPreview');
+            videoPreview.html(''); // Clear previous previews
+            const files = this.files;
+
+            if (files.length > maxVideos) {
+                alert(`You can only upload a maximum of ${maxVideos} videos.`);
+                return;
+            }
+
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    videoPreview.append(`<video src="${e.target.result}" controls style="width: 100px; margin: 5px;"></video>`);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        // Upload via Ajax
+        $('#uploadMedia').click(function () {
+            const formData = new FormData();
+            const images = $('#imageUpload')[0].files;
+            const videos = $('#videoUpload')[0].files;
+            const place = $('#place').val(); 
+            const Area = $('#Area').val();
+
+            if (!place || !Area) {
+                alert('Please fill in both Place and Mandal.');
+                return;
+            }
+
+            // Append Place and Mandal to FormData
+            formData.append('place', place);
+            formData.append('Area', Area);
+            
+
+            // Append images
+            for (let i = 0; i < images.length; i++) {
+                formData.append('Images', images[i]);
+            }
+
+            // Append videos
+            for (let i = 0; i < videos.length; i++) {
+                formData.append('Videos', videos[i]);
+            }
+
+            // Ajax request to upload
+            $.ajax({
+                url: '/Home/UploadFiles',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    $('#responseMessage').html(response.message);
+                    if (response.success) {
+                        $('#responseMessage').css('color', 'green');
+                    } else {
+                        $('#responseMessage').css('color', 'red');
+                    }
+                },
+                error: function () {
+                    $('#responseMessage').html('An error occurred while uploading files.');
+                    $('#responseMessage').css('color', 'red');
+                }
+            });
+        });
+    });
+</script>
