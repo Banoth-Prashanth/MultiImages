@@ -74,6 +74,14 @@ namespace MultiImages.Controllers
                 return Json(new { success = false, message = "An error occurred while uploading files." });
             }
         }
+        public ActionResult demo()
+        {
+            return View();
+        }
+        public ActionResult demo1()
+        {
+            return View();
+        }
 
     }
 }
